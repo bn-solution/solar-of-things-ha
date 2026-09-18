@@ -416,6 +416,22 @@ def test_energy_flow_rule_not_configured_logs_a_warning(api_factory, caplog) -> 
     assert "energy-flow rule" in caplog.text.lower()
 
 
+
+# Live capture 2026-09-18, device 517915003814383616 (energy-flow endpoint).
+# Units confirmed by the payload's own per-field "unit" tag: both V.
+LIVE_CAPTURE_VOLTAGE = {
+    "pvInputVoltage": 187.9,
+    "acInputVoltage": 231.2,
+}
+
+
+def test_live_capture_voltage_fields_map_to_canonical_keys() -> None:
+    """PV/AC input voltage: unit V confirmed from a live capture."""
+    mapped = map_energy_flow_fields(LIVE_CAPTURE_VOLTAGE)
+
+    assert mapped["pvInputVoltage"] == 187.9
+    assert mapped["acInputVoltage"] == 231.2
+
 def test_unknown_firmware_logs_field_names_for_reporting(api_factory, caplog) -> None:
     api, _ = api_factory({}, flow_fields={"someBrandNewKey": 5, "another": 7})
     api.fetch_latest_data("device-7")

@@ -94,8 +94,14 @@
       "pv_input_power": {
         "name": "PV Input Power"
       },
+      "pv_input_voltage": {
+        "name": "PV Input Voltage"
+      },
       "ac_output_active_power": {
         "name": "AC Output Power"
+      },
+      "ac_input_voltage": {
+        "name": "AC Input Voltage"
       },
       "battery_discharge_current": {
         "name": "Battery Discharge Current"

@@ -118,7 +118,9 @@ this project, not a fallback.
 | Entity | Unit | Device Class | Description |
 |---|---|---|---|
 | `{device} PV Input Power` | W | `power` | Solar panel DC input power |
+| `{device} PV Input Voltage` | V | `voltage` | Solar panel DC input voltage |
 | `{device} AC Output Power` | W | `power` | AC power delivered to loads |
+| `{device} AC Input Voltage` | V | `voltage` | AC input voltage |
 | `{device} Battery Charging Current` | A | `current` | Current flowing into battery |
 | `{device} Battery Discharge Current` | A | `current` | Current flowing out of battery |
 | `{device} Battery Voltage` | V | `voltage` | Battery bank terminal voltage |

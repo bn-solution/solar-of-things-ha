@@ -21,12 +21,23 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: "3.12"
+          python-version: "3.11"
 
       - name: Install dependencies
         run: |
           pip install --quiet --upgrade pip
-          pip install --quiet voluptuous requests pycryptodome
+          # Pin everything: tests must reproduce locally (venv) and in CI.
+          # homeassistant 2023.6.3 <-> pytest-homeassistant-custom-component
+          # 0.13.39 are mutually pinned (0.13.x targets one exact HA release).
+          pip install --quiet \
+            pytest==7.3.1 \
+            pytest-asyncio==0.20.3 \
+            pytest-homeassistant-custom-component==0.13.39 \
+            homeassistant==2023.6.3 \
+            pycryptodome \
+            voluptuous \
+            requests \
+            tzdata
 
       - name: Validate manifest.json
         run: |
@@ -79,12 +90,9 @@ jobs:
           python3 -m py_compile *.py
           echo "Python syntax OK"
 
-      - name: Run unit tests (if present)
+      - name: Run unit tests
         run: |
-          pip install --quiet pytest pytest-asyncio || true
-          if [ -d tests ]; then
-            python3 -m pytest tests/ -v --tb=short \
-              || echo "Tests completed (failures tolerated without full HA fixtures)"
-          else
-            echo "No tests directory — skipping"
-          fi
+          # No `|| echo` fallback: a failing test suite must fail the job and
+          # block the merge. Baseline contract is 100% pass (see
+          # tests/KNOWN_DEFECTS.md for documented behavior gaps).
+          python3 -m pytest tests/ -q --tb=short

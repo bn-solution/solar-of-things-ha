@@ -73,7 +73,9 @@ TOKEN_REFRESH_LEAD_SECONDS = 300  # 5 minutes
 # ─── Sensor keys ───────────────────────────────────────────────────────────────
 SENSOR_KEYS = [
     "pvInputPower",
+    "pvInputVoltage",
     "acOutputActivePower",
+    "acInputVoltage",
     "batteryDischargeCurrent",
     "batteryChargingCurrent",
     "batteryVoltage",
@@ -141,6 +143,10 @@ ENERGY_FLOW_RULES: dict[str, list[tuple[str, tuple[str, ...], float]]] = {
     "pvInputPower": [
         ("sum", ("pv1Power", "pv2Power", "pv3Power", "pv4Power"), 1.0),
     ],
+    # Confirmed by a live capture (per-field "unit": "V", device 517915003814383616).
+    "pvInputVoltage": [
+        ("first", ("pvInputVoltage",), 1.0),
+    ],
     "batteryVoltage": [
         ("first", ("bmsBatteryVoltage", "positiveTerminalBatteryVoltage"), 1.0),
     ],
@@ -152,6 +158,10 @@ ENERGY_FLOW_RULES: dict[str, list[tuple[str, tuple[str, ...], float]]] = {
     ],
     "acOutputActivePower": [
         ("sum", ("load_power",), 1000.0),
+    ],
+    # Confirmed by a live capture (per-field "unit": "V", device 517915003814383616).
+    "acInputVoltage": [
+        ("first", ("acInputVoltage",), 1.0),
     ],
     "gridPower": [
         ("clamp_neg", ("aPhaseMainsPower", "bPhaseMainsPower", "cPhaseMainsPower"), 1.0),
@@ -204,11 +214,23 @@ SENSOR_DEFINITIONS = {
         "device_class": "power",
         "icon": "mdi:solar-power",
     },
+    "pvInputVoltage": {
+        "name": "PV Input Voltage",
+        "unit": "V",
+        "device_class": "voltage",
+        "icon": "mdi:solar-power",
+    },
     "acOutputActivePower": {
         "name": "AC Output Power",
         "unit": "W",
         "device_class": "power",
         "icon": "mdi:power-plug",
+    },
+    "acInputVoltage": {
+        "name": "AC Input Voltage",
+        "unit": "V",
+        "device_class": "voltage",
+        "icon": "mdi:transmission-tower",
     },
     "batteryDischargeCurrent": {
         "name": "Battery Discharge Current",
