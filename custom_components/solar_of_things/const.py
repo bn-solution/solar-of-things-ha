@@ -61,6 +61,7 @@ API_SETTINGS_GET   = "/apis/remote/device/configs/cache/get"  # ?deviceId=<id>
 API_SETTINGS_SET   = "/apis/remote/device/config/write"       # ?deviceId=<id>
 API_DEVICE_LIST    = "/apis/device/list"
 API_DEVICE_DETAILS = "/apis/device/details"  # GET ?deviceId=<id>
+API_STATION_DETAILS = "/apis/station/details"  # GET ?stationId=<id>
 # Live "energy flow" endpoint.  GET with ?deviceId=<id>&dataSource=1; values are
 # returned under data.deviceAttributeState.fields.  Used as a fallback when the
 # historical time-series endpoint yields nothing (see ENERGY_FLOW_RULES below).
@@ -77,7 +78,11 @@ SENSOR_KEYS = [
     "pvInputVoltage",
     "acOutputActivePower",
     "acInputVoltage",
+    "acInputFrequency",
     "outputVoltage",
+    "outputFrequency",
+    "outputApparentPower",
+    "loadPercentage",
     "batteryDischargeCurrent",
     "batteryChargingCurrent",
     "batteryVoltage",
@@ -86,6 +91,7 @@ SENSOR_KEYS = [
     "batterySOC",
     "gridPower",
     "loadPower",
+    "ntcMaximumTemperature",
 ]
 
 # ─── Energy-flow fallback mapping ──────────────────────────────────────────────
@@ -153,7 +159,7 @@ ENERGY_FLOW_RULES: dict[str, list[tuple[str, tuple[str, ...], float]]] = {
         ("first", ("bmsBatteryVoltage", "positiveTerminalBatteryVoltage"), 1.0),
     ],
     "batterySOC": [
-        ("first", ("batteryPercentage", "bmsSOC"), 1.0),
+        ("first", ("batteryPercentage", "bmsSOC", "batteryCapacity"), 1.0),
     ],
     "batteryPower": [
         ("first", ("batteryPower",), 1.0),
@@ -168,6 +174,22 @@ ENERGY_FLOW_RULES: dict[str, list[tuple[str, tuple[str, ...], float]]] = {
     # Confirmed by a live capture (per-field "unit": "V", device 517915003814383616).
     "outputVoltage": [
         ("first", ("outputVoltage",), 1.0),
+    ],
+    # Confirmed by a live capture (per-field "unit" tags, device 517915003814383616).
+    "acInputFrequency": [
+        ("first", ("acInputFrequency",), 1.0),
+    ],
+    "outputFrequency": [
+        ("first", ("outputFrequency",), 1.0),
+    ],
+    "outputApparentPower": [
+        ("first", ("outputApparentPower",), 1.0),
+    ],
+    "loadPercentage": [
+        ("first", ("loadPercentage",), 1.0),
+    ],
+    "ntcMaximumTemperature": [
+        ("first", ("ntcMaximumTemperature",), 1.0),
     ],
     "gridPower": [
         ("clamp_neg", ("aPhaseMainsPower", "bPhaseMainsPower", "cPhaseMainsPower"), 1.0),
@@ -243,6 +265,35 @@ SENSOR_DEFINITIONS = {
         "unit": "V",
         "device_class": "voltage",
         "icon": "mdi:power-plug",
+    },
+    "acInputFrequency": {
+        "name": "AC Input Frequency",
+        "unit": "Hz",
+        "device_class": "frequency",
+        "icon": "mdi:sine-wave",
+    },
+    "outputFrequency": {
+        "name": "Output Frequency",
+        "unit": "Hz",
+        "device_class": "frequency",
+        "icon": "mdi:sine-wave",
+    },
+    "outputApparentPower": {
+        "name": "Output Apparent Power",
+        "unit": "VA",
+        "device_class": "apparent_power",
+        "icon": "mdi:flash",
+    },
+    "loadPercentage": {
+        "name": "Load Percentage",
+        "unit": "%",
+        "icon": "mdi:gauge",
+    },
+    "ntcMaximumTemperature": {
+        "name": "NTC Maximum Temperature",
+        "unit": "℃",
+        "device_class": "temperature",
+        "icon": "mdi:thermometer",
     },
     "batteryDischargeCurrent": {
         "name": "Battery Discharge Current",
@@ -327,6 +378,51 @@ SENSOR_DEFINITIONS = {
         "unit": "kWh",
         "device_class": "energy",
         "icon": "mdi:weather-sunny",
+    },
+    # Station-level summary sensors.  Units confirmed by arithmetic cross-checks
+    # from a live station/details capture (2026-09-18, station 517875988254654464):
+    # monthlyProducedQuantity (106.700) = totalGeneratedEnergy (100.678)
+    # + dailyProducedQuantity (6.022); totalEarnings (480.15 THB)
+    # = monthlyProducedQuantity (106.700) x energyIncomePrice (4.50).
+    "station_daily_production": {
+        "name": "Daily Production",
+        "unit": "kWh",
+        "device_class": "energy",
+        "icon": "mdi:calendar-today",
+    },
+    "station_yearly_production": {
+        "name": "Yearly Production",
+        "unit": "kWh",
+        "device_class": "energy",
+        "icon": "mdi:calendar-range",
+    },
+    "station_total_production": {
+        "name": "Total Production",
+        "unit": "kWh",
+        "device_class": "energy",
+        "icon": "mdi:counter",
+    },
+    "station_producing_power": {
+        "name": "Producing Power",
+        "unit": "kW",
+        "device_class": "power",
+        "icon": "mdi:solar-power",
+    },
+    "station_total_earnings": {
+        "name": "Total Earnings",
+        "unit": "THB",
+        "device_class": "monetary",
+        "icon": "mdi:cash",
+    },
+    "station_generation_efficiency": {
+        "name": "Generation Efficiency",
+        "unit": "%",
+        "icon": "mdi:percent-outline",
+    },
+    "station_daily_produced_time": {
+        "name": "Daily Production Time",
+        "unit": "h",
+        "icon": "mdi:clock-outline",
     },
 }
 

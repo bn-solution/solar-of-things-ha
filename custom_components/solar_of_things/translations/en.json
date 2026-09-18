@@ -106,6 +106,21 @@
       "output_voltage": {
         "name": "Output Voltage"
       },
+      "ac_input_frequency": {
+        "name": "AC Input Frequency"
+      },
+      "output_frequency": {
+        "name": "Output Frequency"
+      },
+      "output_apparent_power": {
+        "name": "Output Apparent Power"
+      },
+      "load_percentage": {
+        "name": "Load Percentage"
+      },
+      "ntc_maximum_temperature": {
+        "name": "NTC Maximum Temperature"
+      },
       "battery_discharge_current": {
         "name": "Battery Discharge Current"
       },

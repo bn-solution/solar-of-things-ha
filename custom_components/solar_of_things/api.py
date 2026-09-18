@@ -90,6 +90,7 @@ from .const import (
     API_MONTHLY_SUMMARY,
     API_DEVICE_LIST,
     API_DEVICE_DETAILS,
+    API_STATION_DETAILS,
     API_SETTINGS_GET,
     API_SETTINGS_SET,
     API_ENERGY_FLOW,
@@ -835,13 +836,18 @@ class SolarOfThingsAPI:
             "acOutputActivePower",
             "outputActivePower",
             "acInputVoltage",
+            "acInputFrequency",
             "outputVoltage",
+            "outputFrequency",
+            "outputApparentPower",
+            "loadPercentage",
             "batteryDischargeCurrent",
             "batteryChargingCurrent",
             "batteryVoltage",
             "feedInPower",
             "batterySOC",
             "batteryCapacity",
+            "ntcMaximumTemperature",
         ]
 
         request_body = {
@@ -939,6 +945,25 @@ class SolarOfThingsAPI:
         if code not in (0, None, "0"):
             message = data.get("message") or data.get("msg")
             raise RuntimeError(f"Device details error code={code} message={message}")
+
+        return data.get("data") or {}
+
+    def fetch_station_details(self, station_id: str) -> dict[str, Any]:
+        """Return the raw ``data`` object from the station/details endpoint.
+
+        Source of the station-level summary sensors (daily/yearly/total
+        production, producing power, earnings).  Units confirmed by
+        arithmetic cross-checks from a live capture: monthlyProducedQuantity
+        (106.700) = totalGeneratedEnergy (100.678) + dailyProducedQuantity
+        (6.022); totalEarnings (480.15) = 106.700 x energyIncomePrice (4.50).
+        """
+        self._ensure_token_valid()
+        data = self._get(API_STATION_DETAILS, {"stationId": station_id})
+
+        code = data.get("code")
+        if code not in (0, None, "0"):
+            message = data.get("message") or data.get("msg")
+            raise RuntimeError(f"Station details error code={code} message={message}")
 
         return data.get("data") or {}
 

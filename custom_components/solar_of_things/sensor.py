@@ -7,10 +7,12 @@ from homeassistant.components.sensor import SensorEntity, SensorDeviceClass, Sen
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     PERCENTAGE,
+    UnitOfApparentPower,
     UnitOfElectricCurrent,
     UnitOfElectricPotential,
     UnitOfEnergy,
     UnitOfPower,
+    UnitOfTemperature,
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -26,7 +28,12 @@ _TRANSLATION_KEYS: dict[str, str] = {
     "pvInputVoltage": "pv_input_voltage",
     "acOutputActivePower": "ac_output_active_power",
     "acInputVoltage": "ac_input_voltage",
+    "acInputFrequency": "ac_input_frequency",
     "outputVoltage": "output_voltage",
+    "outputFrequency": "output_frequency",
+    "outputApparentPower": "output_apparent_power",
+    "loadPercentage": "load_percentage",
+    "ntcMaximumTemperature": "ntc_maximum_temperature",
     "batteryDischargeCurrent": "battery_discharge_current",
     "batteryChargingCurrent": "battery_charging_current",
     "batteryVoltage": "battery_voltage",
@@ -138,6 +145,14 @@ class SolarOfThingsDeviceSensor(CoordinatorEntity, SensorEntity):
         elif unit == "V":
             self._attr_device_class = SensorDeviceClass.VOLTAGE
             self._attr_native_unit_of_measurement = UnitOfElectricPotential.VOLT
+            self._attr_state_class = SensorStateClass.MEASUREMENT
+        elif unit == "VA":
+            self._attr_device_class = SensorDeviceClass.APPARENT_POWER
+            self._attr_native_unit_of_measurement = UnitOfApparentPower.VOLT_AMPERE
+            self._attr_state_class = SensorStateClass.MEASUREMENT
+        elif unit == "℃":
+            self._attr_device_class = SensorDeviceClass.TEMPERATURE
+            self._attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
             self._attr_state_class = SensorStateClass.MEASUREMENT
         elif unit == "%":
             if "battery" in sensor_key.lower():

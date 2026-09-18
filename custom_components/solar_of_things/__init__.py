@@ -233,6 +233,42 @@ class SolarOfThingsStationCoordinator(DataUpdateCoordinator):
             monthly = await self.hass.async_add_executor_job(
                 self.api.fetch_monthly_summary, self.station_id
             )
+            # Station/details carries authoritative production totals whose
+            # units are confirmed by arithmetic cross-checks (see
+            # SolarOfThingsAPI.fetch_station_details).  The generic monthly
+            # summary endpoint returns 0 for station-firmware combos whose
+            # summary keys differ, so the confirmed station figures win.
+            # Additive: a failure here must not take the station update
+            # down; TokenExpiredError still triggers re-auth.
+            try:
+                details = await self.hass.async_add_executor_job(
+                    self.api.fetch_station_details, self.station_id
+                )
+            except TokenExpiredError:
+                raise
+            except Exception as err:
+                _LOGGER.debug(
+                    "SolarOfThings station %s: station details unavailable: %s",
+                    self.station_id, err,
+                )
+                details = None
+            if details:
+                mpq = details.get("monthlyProducedQuantity")
+                if mpq is not None:
+                    monthly["monthly_pv_generated"] = float(mpq)
+                station_fields = (
+                    ("station_daily_production", "dailyProducedQuantity"),
+                    ("station_yearly_production", "yearlyProducedQuantity"),
+                    ("station_total_production", "totalProducedQuantity"),
+                    ("station_producing_power", "producingPower"),
+                    ("station_total_earnings", "totalEarnings"),
+                    ("station_generation_efficiency", "generationEfficiency"),
+                    ("station_daily_produced_time", "dailyProducedTime"),
+                )
+                for key, field in station_fields:
+                    v = details.get(field)
+                    if v is not None:
+                        monthly[key] = float(v)
             return {"devices": devices, "monthly": monthly}
         except TokenExpiredError as err:
             _LOGGER.error(
