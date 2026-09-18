@@ -277,6 +277,25 @@ class SolarOfThingsDeviceCoordinator(DataUpdateCoordinator):
             settings = await self.hass.async_add_executor_job(
                 self.api.fetch_settings, self.device_id
             )
+            # Daily production (kWh) comes from device/details, not the
+            # time-series endpoint. Purely additive: a failure here must not
+            # take the whole coordinator down, so the daily_production key is
+            # simply skipped for that cycle. TokenExpiredError still
+            # propagates so the outer except triggers re-auth.
+            try:
+                details = await self.hass.async_add_executor_job(
+                    self.api.fetch_device_details, self.device_id
+                )
+            except TokenExpiredError:
+                raise
+            except Exception as err:
+                _LOGGER.debug(
+                    "SolarOfThings device %s: device details unavailable: %s",
+                    self.device_id, err,
+                )
+                details = None
+            if details:
+                time_series["daily_production"] = details.get("dailyProducedQuantity")
             return {
                 "time_series": time_series,
                 "settings": settings,

@@ -129,6 +129,7 @@ this project, not a fallback.
 | `{device} Grid Feed-in Power` | W | `power` | Power exported to the utility grid |
 | `{device} Grid Import Power` | W | `power` | Power imported from the utility grid |
 | `{device} Load Power` | W | `power` | Total household / load consumption |
+| `{device} Daily Production` | kWh | `energy` | Energy produced today (resets daily) |
 
 ### Monthly Station Sensors
 > Updated every **30 minutes** · Requires Station ID

@@ -89,6 +89,7 @@ from .const import (
     API_TIME_SERIES,
     API_MONTHLY_SUMMARY,
     API_DEVICE_LIST,
+    API_DEVICE_DETAILS,
     API_SETTINGS_GET,
     API_SETTINGS_SET,
     API_ENERGY_FLOW,
@@ -921,6 +922,24 @@ class SolarOfThingsAPI:
             # Tolerate the values being nested directly under data.fields.
             fields = payload.get("fields")
         return fields if isinstance(fields, dict) else {}
+
+    def fetch_device_details(self, device_id: str) -> dict[str, Any]:
+        """Return the raw ``data`` object from the device/details endpoint.
+
+        Source of the per-device "Daily Production" sensor.  Confirmed by a
+        live capture (2026-09-18, device 517915003814383616) which returned
+        ``dailyProducedQuantity`` in kWh, resetting daily; the unit is backed
+        by an arithmetic cross-check: totalProducedQuantity (99.468) equals
+        totalGeneratedEnergy (97.939) + dailyProducedQuantity (1.529).
+        """
+        data = self._get(API_DEVICE_DETAILS, {"deviceId": device_id})
+
+        code = data.get("code")
+        if code not in (0, None, "0"):
+            message = data.get("message") or data.get("msg")
+            raise RuntimeError(f"Device details error code={code} message={message}")
+
+        return data.get("data") or {}
 
     @staticmethod
     def _apply_derived_values(latest_values: dict[str, Any]) -> None:

@@ -60,6 +60,7 @@ API_MONTHLY_SUMMARY = "/apis/stationOverView/stateAttributeSummary/category/year
 API_SETTINGS_GET   = "/apis/remote/device/configs/cache/get"  # ?deviceId=<id>
 API_SETTINGS_SET   = "/apis/remote/device/config/write"       # ?deviceId=<id>
 API_DEVICE_LIST    = "/apis/device/list"
+API_DEVICE_DETAILS = "/apis/device/details"  # GET ?deviceId=<id>
 # Live "energy flow" endpoint.  GET with ?deviceId=<id>&dataSource=1; values are
 # returned under data.deviceAttributeState.fields.  Used as a fallback when the
 # historical time-series endpoint yields nothing (see ENERGY_FLOW_RULES below).
@@ -303,6 +304,18 @@ SENSOR_DEFINITIONS = {
         "name": "Monthly Solar Coverage",
         "unit": "%",
         "icon": "mdi:percent",
+    },
+    # Daily production (per-device, from device/details).
+    # Unit kWh confirmed by arithmetic cross-check from a live capture
+    # (2026-09-18, device 517915003814383616):
+    #   totalProducedQuantity (99.468) = totalGeneratedEnergy (97.939)
+    #                                  + dailyProducedQuantity (1.529)
+    # dailyProducedQuantity resets every day.
+    "daily_production": {
+        "name": "Daily Production",
+        "unit": "kWh",
+        "device_class": "energy",
+        "icon": "mdi:weather-sunny",
     },
 }
 

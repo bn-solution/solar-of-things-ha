@@ -127,6 +127,9 @@
       "load_power": {
         "name": "Load Power"
       },
+      "daily_production": {
+        "name": "Daily Production"
+      },
       "monthly_pv_generated": {
         "name": "Monthly PV Generated"
       },
