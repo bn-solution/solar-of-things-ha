@@ -835,6 +835,7 @@ class SolarOfThingsAPI:
             "acOutputActivePower",
             "outputActivePower",
             "acInputVoltage",
+            "outputVoltage",
             "batteryDischargeCurrent",
             "batteryChargingCurrent",
             "batteryVoltage",

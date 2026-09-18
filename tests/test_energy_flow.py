@@ -422,6 +422,7 @@ def test_energy_flow_rule_not_configured_logs_a_warning(api_factory, caplog) -> 
 LIVE_CAPTURE_VOLTAGE = {
     "pvInputVoltage": 187.9,
     "acInputVoltage": 231.2,
+    "outputVoltage": 229.7,
 }
 
 
@@ -431,6 +432,7 @@ def test_live_capture_voltage_fields_map_to_canonical_keys() -> None:
 
     assert mapped["pvInputVoltage"] == 187.9
     assert mapped["acInputVoltage"] == 231.2
+    assert mapped["outputVoltage"] == 229.7
 
 def test_unknown_firmware_logs_field_names_for_reporting(api_factory, caplog) -> None:
     api, _ = api_factory({}, flow_fields={"someBrandNewKey": 5, "another": 7})

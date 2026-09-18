@@ -121,6 +121,7 @@ this project, not a fallback.
 | `{device} PV Input Voltage` | V | `voltage` | Solar panel DC input voltage |
 | `{device} AC Output Power` | W | `power` | AC power delivered to loads |
 | `{device} AC Input Voltage` | V | `voltage` | AC input voltage |
+| `{device} Output Voltage` | V | `voltage` | AC output voltage delivered to loads |
 | `{device} Battery Charging Current` | A | `current` | Current flowing into battery |
 | `{device} Battery Discharge Current` | A | `current` | Current flowing out of battery |
 | `{device} Battery Voltage` | V | `voltage` | Battery bank terminal voltage |

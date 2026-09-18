@@ -77,6 +77,7 @@ SENSOR_KEYS = [
     "pvInputVoltage",
     "acOutputActivePower",
     "acInputVoltage",
+    "outputVoltage",
     "batteryDischargeCurrent",
     "batteryChargingCurrent",
     "batteryVoltage",
@@ -164,6 +165,10 @@ ENERGY_FLOW_RULES: dict[str, list[tuple[str, tuple[str, ...], float]]] = {
     "acInputVoltage": [
         ("first", ("acInputVoltage",), 1.0),
     ],
+    # Confirmed by a live capture (per-field "unit": "V", device 517915003814383616).
+    "outputVoltage": [
+        ("first", ("outputVoltage",), 1.0),
+    ],
     "gridPower": [
         ("clamp_neg", ("aPhaseMainsPower", "bPhaseMainsPower", "cPhaseMainsPower"), 1.0),
     ],
@@ -232,6 +237,12 @@ SENSOR_DEFINITIONS = {
         "unit": "V",
         "device_class": "voltage",
         "icon": "mdi:transmission-tower",
+    },
+    "outputVoltage": {
+        "name": "Output Voltage",
+        "unit": "V",
+        "device_class": "voltage",
+        "icon": "mdi:power-plug",
     },
     "batteryDischargeCurrent": {
         "name": "Battery Discharge Current",

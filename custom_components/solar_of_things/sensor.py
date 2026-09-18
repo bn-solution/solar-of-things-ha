@@ -26,6 +26,7 @@ _TRANSLATION_KEYS: dict[str, str] = {
     "pvInputVoltage": "pv_input_voltage",
     "acOutputActivePower": "ac_output_active_power",
     "acInputVoltage": "ac_input_voltage",
+    "outputVoltage": "output_voltage",
     "batteryDischargeCurrent": "battery_discharge_current",
     "batteryChargingCurrent": "battery_charging_current",
     "batteryVoltage": "battery_voltage",

@@ -103,6 +103,9 @@
       "ac_input_voltage": {
         "name": "AC Input Voltage"
       },
+      "output_voltage": {
+        "name": "Output Voltage"
+      },
       "battery_discharge_current": {
         "name": "Battery Discharge Current"
       },
