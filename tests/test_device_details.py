@@ -175,3 +175,67 @@ async def test_coordinator_token_expiry_from_details_still_triggers_reauth() -> 
     with pytest.raises(UpdateFailed):
         await coord._async_update_data()
     coord._entry.async_start_reauth.assert_called_once()
+
+# ─── Station-level summary sensors (station/details endpoint) ──────────────
+
+# Live capture 2026-09-18, station 517875988254654464.  Units confirmed by
+# arithmetic cross-checks:
+#   monthlyProducedQuantity (106.700) = totalGeneratedEnergy (100.678)
+#                                     + dailyProducedQuantity (6.022)
+#   totalEarnings (480.15) = 106.700 x energyIncomePrice (4.50 THB)
+STATION_DETAILS = {
+    "dailyProducedQuantity": 6.022,
+    "yearlyProducedQuantity": 106.700,
+    "totalProducedQuantity": 106.700,
+    "monthlyProducedQuantity": 106.700,
+    "producingPower": 0.00,
+    "totalEarnings": 480.15,
+    "generationEfficiency": 0.00,
+    "dailyProducedTime": 0.97,
+}
+
+
+def test_fetch_station_details_returns_raw_data():
+    api = SolarOfThingsAPI(iot_token="test-token")
+    api._ensure_token_valid = lambda: None  # no network
+    seen = {}
+
+    def fake_get(path, params, **kwargs):
+        seen["path"] = path
+        seen["params"] = params
+        return {"code": 0, "data": STATION_DETAILS}
+
+    api._get = fake_get
+    result = api.fetch_station_details("517875988254654464")
+
+    assert result == STATION_DETAILS
+    assert seen["params"] == {"stationId": "517875988254654464"}
+
+
+def test_fetch_station_details_raises_on_error_code():
+    import pytest
+
+    api = SolarOfThingsAPI(iot_token="test-token")
+    api._ensure_token_valid = lambda: None
+    api._get = lambda path, params, **kw: {"code": 500, "message": "boom"}
+
+    with pytest.raises(RuntimeError, match="Station details error"):
+        api.fetch_station_details("517875988254654464")
+
+
+def test_station_definitions_units_confirmed_by_capture():
+    """The seven station sensor keys must exist with the captured units."""
+    from custom_components.solar_of_things.const import SENSOR_DEFINITIONS as SD
+
+    expected = {
+        "station_daily_production": "kWh",
+        "station_yearly_production": "kWh",
+        "station_total_production": "kWh",
+        "station_producing_power": "kW",
+        "station_total_earnings": "THB",
+        "station_generation_efficiency": "%",
+        "station_daily_produced_time": "h",
+    }
+    for key, unit in expected.items():
+        assert SD[key]["unit"] == unit, key
+

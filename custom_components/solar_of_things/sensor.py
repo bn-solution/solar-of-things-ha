@@ -13,6 +13,7 @@ from homeassistant.const import (
     UnitOfEnergy,
     UnitOfPower,
     UnitOfTemperature,
+    UnitOfTime,
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -34,6 +35,13 @@ _TRANSLATION_KEYS: dict[str, str] = {
     "outputApparentPower": "output_apparent_power",
     "loadPercentage": "load_percentage",
     "ntcMaximumTemperature": "ntc_maximum_temperature",
+    "station_daily_production": "station_daily_production",
+    "station_yearly_production": "station_yearly_production",
+    "station_total_production": "station_total_production",
+    "station_producing_power": "station_producing_power",
+    "station_total_earnings": "station_total_earnings",
+    "station_generation_efficiency": "station_generation_efficiency",
+    "station_daily_produced_time": "station_daily_produced_time",
     "batteryDischargeCurrent": "battery_discharge_current",
     "batteryChargingCurrent": "battery_charging_current",
     "batteryVoltage": "battery_voltage",
@@ -69,7 +77,7 @@ async def async_setup_entry(
         device_name = (coordinator.device_meta or {}).get("name") or device_id
 
         for key, definition in SENSOR_DEFINITIONS.items():
-            if key.startswith("monthly_"):
+            if key.startswith("monthly_") or key.startswith("station_"):
                 continue
 
             entities.append(
@@ -86,7 +94,7 @@ async def async_setup_entry(
     # Station-level monthly sensors
     if station_coordinator:
         for key, definition in SENSOR_DEFINITIONS.items():
-            if not key.startswith("monthly_"):
+            if not (key.startswith("monthly_") or key.startswith("station_")):
                 continue
 
             entities.append(
@@ -212,6 +220,17 @@ class SolarOfThingsStationMonthlySensor(CoordinatorEntity, SensorEntity):
             self._attr_state_class = SensorStateClass.TOTAL
         elif unit == "%":
             self._attr_native_unit_of_measurement = PERCENTAGE
+            self._attr_state_class = SensorStateClass.MEASUREMENT
+        elif unit == "kW":
+            self._attr_device_class = SensorDeviceClass.POWER
+            self._attr_native_unit_of_measurement = UnitOfPower.KILO_WATT
+            self._attr_state_class = SensorStateClass.MEASUREMENT
+        elif unit == "THB":
+            self._attr_device_class = SensorDeviceClass.MONETARY
+            self._attr_native_unit_of_measurement = unit
+            self._attr_state_class = SensorStateClass.TOTAL
+        elif unit == "h":
+            self._attr_native_unit_of_measurement = UnitOfTime.HOURS
             self._attr_state_class = SensorStateClass.MEASUREMENT
 
     @property

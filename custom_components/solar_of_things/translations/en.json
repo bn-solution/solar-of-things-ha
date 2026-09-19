@@ -121,6 +121,27 @@
       "ntc_maximum_temperature": {
         "name": "NTC Maximum Temperature"
       },
+      "station_daily_production": {
+        "name": "Daily Production"
+      },
+      "station_yearly_production": {
+        "name": "Yearly Production"
+      },
+      "station_total_production": {
+        "name": "Total Production"
+      },
+      "station_producing_power": {
+        "name": "Producing Power"
+      },
+      "station_total_earnings": {
+        "name": "Total Earnings"
+      },
+      "station_generation_efficiency": {
+        "name": "Generation Efficiency"
+      },
+      "station_daily_produced_time": {
+        "name": "Daily Production Time"
+      },
       "battery_discharge_current": {
         "name": "Battery Discharge Current"
       },

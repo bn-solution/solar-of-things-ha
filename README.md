@@ -132,6 +132,12 @@ this project, not a fallback.
 | `{device} Load Power` | W | `power` | Total household / load consumption |
 | `{device} Daily Production` | kWh | `energy` | Energy produced today (resets daily) |
 
+| `{device} AC Input Frequency` | Hz | `frequency` | Utility grid frequency |
+| `{device} Output Frequency` | Hz | `frequency` | AC output frequency |
+| `{device} Output Apparent Power` | VA | `apparent_power` | Apparent power delivered to loads |
+| `{device} Load Percentage` | % | — | Load level as a percentage of rated capacity |
+| `{device} NTC Maximum Temperature` | °C | `temperature` | Maximum NTC temperature reading |
+
 ### Monthly Station Sensors
 > Updated every **30 minutes** · Requires Station ID
 
@@ -141,6 +147,13 @@ this project, not a fallback.
 | `Station {id} Monthly Grid Import` | kWh | `energy` | Total grid import this month |
 | `Station {id} Monthly Total Consumption` | kWh | `energy` | Total household consumption this month |
 | `Station {id} Monthly Solar Coverage` | % | — | Percentage of consumption met by solar |
+| `{id} Daily Production` | kWh | `energy` | Energy produced by the whole station today |
+| `{id} Yearly Production` | kWh | `energy` | Energy produced by the station this year |
+| `{id} Total Production` | kWh | `energy` | Lifetime energy produced by the station |
+| `{id} Producing Power` | kW | `power` | Current station output |
+| `{id} Total Earnings` | THB | `monetary` | Cumulative earnings from exported/produced energy |
+| `{id} Generation Efficiency` | % | — | Station generation efficiency |
+| `{id} Daily Production Time` | h | — | Equivalent full-production hours today |
 
 ---
 
