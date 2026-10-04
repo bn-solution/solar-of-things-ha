@@ -136,6 +136,9 @@
       "station_total_earnings": {
         "name": "Total Earnings"
       },
+      "station_monthly_earnings": {
+        "name": "Total Earnings Per Month"
+      },
       "station_generation_efficiency": {
         "name": "Generation Efficiency"
       },

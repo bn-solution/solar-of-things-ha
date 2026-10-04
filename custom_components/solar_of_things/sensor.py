@@ -40,6 +40,7 @@ _TRANSLATION_KEYS: dict[str, str] = {
     "station_total_production": "station_total_production",
     "station_producing_power": "station_producing_power",
     "station_total_earnings": "station_total_earnings",
+    "station_monthly_earnings": "station_monthly_earnings",
     "station_generation_efficiency": "station_generation_efficiency",
     "station_daily_produced_time": "station_daily_produced_time",
     "batteryDischargeCurrent": "battery_discharge_current",

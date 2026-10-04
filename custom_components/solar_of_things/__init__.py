@@ -269,6 +269,27 @@ class SolarOfThingsStationCoordinator(DataUpdateCoordinator):
                     v = details.get(field)
                     if v is not None:
                         monthly[key] = float(v)
+                # Total Earnings Per Month = this month's production (kWh)
+                # times the per-kWh tariff (THB/kWh).  Cross-checked against a
+                # live capture: 480.15 = 106.700 x 4.50, where 106.700 is the
+                # station's monthlyProducedQuantity and 4.50 the
+                # energyIncomePrice.  A missing tariff omits the key on
+                # purpose so the sensor reads unknown rather than a bogus 0.
+                price = details.get("energyIncomePrice")
+                base = mpq if mpq is not None else monthly.get(
+                    "monthly_pv_generated"
+                )
+                if price is not None and base is not None:
+                    try:
+                        monthly["station_monthly_earnings"] = round(
+                            float(base) * float(price), 2
+                        )
+                    except (TypeError, ValueError):
+                        _LOGGER.debug(
+                            "SolarOfThings station %s: cannot compute monthly "
+                            "earnings (base=%r price=%r)",
+                            self.station_id, base, price,
+                        )
             return {"devices": devices, "monthly": monthly}
         except TokenExpiredError as err:
             _LOGGER.error(
