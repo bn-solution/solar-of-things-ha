@@ -414,6 +414,15 @@ SENSOR_DEFINITIONS = {
         "device_class": "monetary",
         "icon": "mdi:cash",
     },
+    # Total Earnings Per Month = monthly production (kWh) x tariff (THB/kWh),
+    # computed in the station coordinator.  Cross-checked against a live
+    # capture: 480.15 = 106.700 x 4.50.
+    "station_monthly_earnings": {
+        "name": "Total Earnings Per Month",
+        "unit": "THB",
+        "device_class": "monetary",
+        "icon": "mdi:cash-multiple",
+    },
     "station_generation_efficiency": {
         "name": "Generation Efficiency",
         "unit": "%",

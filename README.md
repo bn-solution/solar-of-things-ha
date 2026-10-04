@@ -152,6 +152,7 @@ this project, not a fallback.
 | `{id} Total Production` | kWh | `energy` | Lifetime energy produced by the station |
 | `{id} Producing Power` | kW | `power` | Current station output |
 | `{id} Total Earnings` | THB | `monetary` | Cumulative earnings from exported/produced energy |
+| `{id} Total Earnings Per Month` | THB | `monetary` | This month's production x tariff |
 | `{id} Generation Efficiency` | % | — | Station generation efficiency |
 | `{id} Daily Production Time` | h | — | Equivalent full-production hours today |
 
