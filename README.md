@@ -55,7 +55,7 @@ The **Solar of Things** integration connects Home Assistant to the
 [Siseli solar portal](https://solar.siseli.com) and provides:
 
 - **Auto-discovery** of every inverter under your station — enter your Station ID once and Home Assistant finds all devices automatically.
-- **10+ real-time sensors** updated every 5 minutes.
+- **70+ real-time sensors** updated every 5 minutes.
 - **4 monthly summary sensors** for energy totals and solar coverage.
 - **8 control entities** (sliders, dropdowns, switches) to manage battery limits, operating modes, and grid settings from HA.
 - Full **Home Assistant Energy Dashboard** compatibility.
@@ -99,7 +99,7 @@ this project, not a fallback.
 | Category | What you get |
 |---|---|
 | 🔍 **Auto-discovery** | Enter Station ID → HA fetches all device IDs automatically |
-| 📊 **Real-time monitoring** | 10 per-device sensors, updated every 5 min |
+| 📊 **Real-time monitoring** | 70+ per-device sensors, updated every 5 min |
 | 📅 **Monthly statistics** | 4 station-level energy summary sensors |
 | 🎛️ **System control** | 8 control entities (battery limits, modes, grid switches) |
 | ⚡ **Energy Dashboard** | All power and energy sensors are dashboard-ready |
@@ -137,6 +137,84 @@ this project, not a fallback.
 | `{device} Output Apparent Power` | VA | `apparent_power` | Apparent power delivered to loads |
 | `{device} Load Percentage` | % | — | Load level as a percentage of rated capacity |
 | `{device} NTC Maximum Temperature` | °C | `temperature` | Maximum NTC temperature reading |
+
+### Device State & Firmware Sensors
+> Updated every **5 minutes** · Read from the device's latest-state snapshot (`dataSource=2`). Enum attributes render the portal's own text (e.g. "Line Mode", "CSO"); numeric attributes use the snapshot only when the time-series endpoint has no value for that field.
+
+#### Inverter state & mode
+
+| Entity | Unit | Description |
+|---|---|---|
+| `{device} Working State` | — | Operating mode (Line / battery / bypass) |
+| `{device} Grid State` | — | Mains connection state |
+| `{device} Battery State` | — | Charging / discharging |
+| `{device} Load Status` | — | Load condition |
+| `{device} Output Relay Status` | — | Output relay ON/OFF |
+| `{device} Mains Relay Status` | — | Mains relay ON/OFF |
+| `{device} PV Access Flag` | — | Whether PV input is connected |
+| `{device} PV Status` | — | Detailed PV connection state |
+| `{device} Output Source Priority` | — | USO / SUB / SBU |
+| `{device} Charger Source Priority` | — | CSO / SNU / OSO |
+| `{device} Battery Type` | — | Configured battery chemistry |
+| `{device} Mains Input Range` | — | Appliance (APL) / UPS |
+| `{device} Battery Equalization` | — | Equalization on/off |
+| `{device} Start Balancing Immediately` | — | Manual balance trigger state |
+| `{device} Dual Output Switch` | — | Dual output on/off |
+| `{device} Grid Connected Switch` | — | Grid-tie switch ON/OFF |
+| `{device} LED Pattern Switch` | — | LED indicator switch |
+| `{device} Mains Access Delay` | — | Mains access delay enabled |
+| `{device} Main CPU Version` | — | Firmware version string |
+
+#### Electrical ratings, limits & set-points
+
+| Entity | Unit | Description |
+|---|---|---|
+| `{device} Generation Power` | W | Total PV generation (scaled from kW) |
+| `{device} Nominal Active Power` | W | Rated active power |
+| `{device} Nominal Apparent Power` | VA | Rated apparent power |
+| `{device} Nominal Output Current` | A | Rated output current |
+| `{device} Nominal AC Current` | A | Rated AC current |
+| `{device} Grid Connected Current Set` | A | Grid-tie current setting |
+| `{device} Max Total Charge Current` | A | Maximum total charging current |
+| `{device} Utility Charge Current` | A | Utility charging current limit |
+| `{device} Nominal Output Frequency` | Hz | Rated output frequency |
+| `{device} Float Charging Voltage` | V | Float charge set-point |
+| `{device} Bulk Charging Voltage` | V | Bulk/boost charge set-point |
+| `{device} Battery Equalization Voltage` | V | Equalization voltage set-point |
+| `{device} Low Battery Cut-off Voltage` | V | Low-voltage shutdown point |
+| `{device} Dual Output Cut-off Voltage` | V | Dual output cut-off point |
+| `{device} SBU Back To Utility Voltage` | V | SBU return-to-mains voltage point |
+| `{device} SBU Back To Battery Voltage` | V | SBU return-to-battery voltage point |
+| `{device} Nominal AC Voltage` | V | Rated AC input voltage |
+| `{device} Nominal Output Voltage` | V | Rated output voltage |
+| `{device} Nominal Battery Voltage` | V | Rated battery bank voltage |
+| `{device} Battery Rated Voltage` | V | As reported by firmware (may be mislabelled) |
+| `{device} Battery Capacity` | % | Inverter-side battery SOC |
+| `{device} Dual Output Cut-off SOC` | % | SOC cut-off for dual output |
+| `{device} Dual Output Limit Power Percentage` | % | Dual output power limit |
+| `{device} Back To Utility SOC` | % | SOC threshold to return to utility |
+| `{device} Battery Volt Under Cut-off SOC` | % | SOC cut-off by voltage threshold |
+| `{device} Battery Volt Back To Battery SOC` | % | SOC threshold to return to battery |
+
+#### BMS & battery detail
+
+| Entity | Unit | Description |
+|---|---|---|
+| `{device} BMS Battery Voltage` | V | BMS-reported pack voltage |
+| `{device} BMS Cell Minimum Voltage` | V | Lowest cell voltage |
+| `{device} BMS Cell Maximum Voltage` | V | Highest cell voltage |
+| `{device} BMS Cell Maximum Temperature` | °C | Hottest cell temperature |
+| `{device} BMS Cell Minimum Temperature` | °C | Coldest cell temperature |
+| `{device} BMS MOS Temperature` | °C | BMS MOSFET temperature |
+| `{device} BMS Ambient Temperature` | °C | BMS ambient temperature |
+| `{device} BMS Battery SOC` | % | BMS-reported SOC |
+| `{device} BMS Battery Charging Current` | A | BMS charge current |
+| `{device} BMS Battery Discharge Current` | A | BMS discharge current |
+| `{device} BMS Cycle Count` | — | BMS cycle counter |
+| `{device} BMS Battery Capacity` | Ah | BMS-reported capacity |
+| `{device} Battery Equalization Interval` | day | Days between equalizations |
+| `{device} Battery Equalization Time` | min | Equalization duration |
+| `{device} Battery Equalization Timeout` | min | Equalization timeout limit |
 
 ### Monthly Station Sensors
 > Updated every **30 minutes** · Requires Station ID
