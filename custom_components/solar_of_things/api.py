@@ -94,6 +94,7 @@ from .const import (
     API_SETTINGS_GET,
     API_SETTINGS_SET,
     API_ENERGY_FLOW,
+    API_LATEST_STATE,
     ENERGY_FLOW_RULES,
     REALTIME_PROBE_KEYS,
     SETTING_KEY_ALIASES,
@@ -1087,6 +1088,26 @@ class SolarOfThingsAPI:
                 f"message={data.get('message')}"
             )
         return data.get("data") or {}
+
+    def fetch_latest_state(self, device_id: str) -> dict[str, Any]:
+        """Fetch the device's latest reported state (dataSource=2).
+
+        Returns a flat dict of {fieldKey: fieldObject} where each object
+        carries at least 'unit', 'value' and 'valueDisplay'.  Covers every
+        attribute the firmware reports, including enum states the
+        historical time-series endpoint never carries.
+        """
+        self._ensure_token_valid()
+        url = f"{API_BASE_URL}{API_LATEST_STATE}?deviceId={device_id}&dataSource=2"
+        resp = self.session.get(url, timeout=30)
+        resp.raise_for_status()
+        data = resp.json()
+        if data.get("code") not in (0, None):
+            raise RuntimeError(
+                f"Latest state error code={data.get('code')} "
+                f"message={data.get('message')}"
+            )
+        return ((data.get("data") or {}).get("fields")) or {}
 
     # Alias used by the coordinator in __init__.py
     fetch_settings = get_device_settings

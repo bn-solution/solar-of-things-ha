@@ -11,6 +11,7 @@ from homeassistant.const import (
     UnitOfElectricCurrent,
     UnitOfElectricPotential,
     UnitOfEnergy,
+    UnitOfFrequency,
     UnitOfPower,
     UnitOfTemperature,
     UnitOfTime,
@@ -134,9 +135,10 @@ class SolarOfThingsDeviceSensor(CoordinatorEntity, SensorEntity):
         self._attr_translation_key = _TRANSLATION_KEYS.get(sensor_key)
         # Fallback name if no translation key
         if not self._attr_translation_key:
-            self._attr_name = f"{device_name} {sensor_definition['name']}"
+            self._attr_name = sensor_definition['name']
         self._attr_unique_id = f"{DOMAIN}_{station_id}_{device_id}_{sensor_key}"
         self._attr_icon = sensor_definition.get("icon")
+        self._latest_scale = float(sensor_definition.get("latest_scale", 1.0))
 
         unit = sensor_definition.get("unit")
         if unit == "W":
@@ -158,6 +160,19 @@ class SolarOfThingsDeviceSensor(CoordinatorEntity, SensorEntity):
         elif unit == "VA":
             self._attr_device_class = SensorDeviceClass.APPARENT_POWER
             self._attr_native_unit_of_measurement = UnitOfApparentPower.VOLT_AMPERE
+            self._attr_state_class = SensorStateClass.MEASUREMENT
+        elif unit == "Hz":
+            self._attr_device_class = SensorDeviceClass.FREQUENCY
+            self._attr_native_unit_of_measurement = UnitOfFrequency.HERTZ
+            self._attr_state_class = SensorStateClass.MEASUREMENT
+        elif unit == "min":
+            self._attr_native_unit_of_measurement = UnitOfTime.MINUTES
+            self._attr_state_class = SensorStateClass.MEASUREMENT
+        elif unit == "day":
+            self._attr_native_unit_of_measurement = UnitOfTime.DAYS
+            self._attr_state_class = SensorStateClass.MEASUREMENT
+        elif unit == "Ah":
+            self._attr_native_unit_of_measurement = "Ah"
             self._attr_state_class = SensorStateClass.MEASUREMENT
         elif unit == "℃":
             self._attr_device_class = SensorDeviceClass.TEMPERATURE
@@ -184,10 +199,28 @@ class SolarOfThingsDeviceSensor(CoordinatorEntity, SensorEntity):
         ts = (self.coordinator.data or {}).get("time_series") or {}
         val = ts.get(self._sensor_key)
         if val is None:
-            return None
+            # Latest-state fallback (dataSource=2).  Enum/text attributes
+            # render the portal's own valueDisplay ("Line Mode", "CSO", ...);
+            # numeric fields use the raw value scaled into the declared unit
+            # (the endpoint reports kW sources, this integration uses W).
+            field = (
+                (self.coordinator.data or {}).get("latest_fields") or {}
+            ).get(self._sensor_key)
+            if field is None:
+                return None
+            display = field.get("valueDisplay")
+            if not self._sensor_definition.get("unit"):
+                return display if display is not None else field.get("value")
+            val = field.get("value")
+            if val is None:
+                return None
+            try:
+                val = float(val) * self._latest_scale
+            except (TypeError, ValueError):
+                return display
         try:
             return round(float(val), 2)
-        except Exception:
+        except (TypeError, ValueError):
             return None
 
 

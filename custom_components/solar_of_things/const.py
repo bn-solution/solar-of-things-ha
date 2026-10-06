@@ -66,6 +66,12 @@ API_STATION_DETAILS = "/apis/station/details"  # GET ?stationId=<id>
 # returned under data.deviceAttributeState.fields.  Used as a fallback when the
 # historical time-series endpoint yields nothing (see ENERGY_FLOW_RULES below).
 API_ENERGY_FLOW    = "/apis/deviceState/simple/energy/flow/v1"
+# Device "latest state" endpoint (dataSource=2).  GET ?deviceId=<id>&dataSource=2
+# returns data.fields as a map of {fieldKey: {unit, value, valueDisplay,
+# nameDisplay}} covering every attribute the firmware reports — including the
+# enum states (workingStates, gridState, batState, ...) that the historical
+# time-series endpoint never carries.
+API_LATEST_STATE   = "/apis/deviceState/simple/state/latest/v1"
 
 # ─── Token refresh window ──────────────────────────────────────────────────────
 # Refresh the access token this many seconds *before* its stated expiry.
@@ -253,6 +259,9 @@ SENSOR_DEFINITIONS = {
         "unit": "W",
         "device_class": "power",
         "icon": "mdi:power-plug",
+        # The latest-state endpoint reports this field in kW; the latest-state
+        # fallback in sensor.py scales it into the declared W unit.
+        "latest_scale": 1000.0,
     },
     "acInputVoltage": {
         "name": "AC Input Voltage",
@@ -343,6 +352,89 @@ SENSOR_DEFINITIONS = {
         "device_class": "power",
         "icon": "mdi:home-lightning-bolt",
     },
+    # ─── Latest-state attributes (deviceState/simple/state/latest, dataSource=2)
+    # Every field the firmware reports, from a live capture (2026-10-06,
+    # device 517915003814383616).  Units are the API's own per-field "unit"
+    # tags.  Fields without a unit are enums/text and render valueDisplay
+    # ("Line Mode", "CSO", ...) as a string state.  kW sources scale into W
+    # via "latest_scale" (applied by the latest-state fallback in sensor.py).
+    "workingStates": {
+        "name": "Working State",
+        "icon": "mdi:state-machine",
+    },
+    "gridState": {"name": "Grid State", "icon": "mdi:transmission-tower"},
+    "batState": {"name": "Battery State", "icon": "mdi:battery"},
+    "loadStatus": {"name": "Load Status", "icon": "mdi:home-lightning-bolt"},
+    "outputRelayStatus": {"name": "Output Relay Status", "icon": "mdi:electric-switch"},
+    "mainsRelayStatus": {"name": "Mains Relay Status", "icon": "mdi:electric-switch"},
+    "photovoltaicAccessFlag": {"name": "PV Access Flag", "icon": "mdi:solar-power"},
+    "pvStatuss": {"name": "PV Status", "icon": "mdi:solar-power"},
+    "outputSourcePriority": {"name": "Output Source Priority", "icon": "mdi:swap-horizontal"},
+    "chargerSourcePriority": {"name": "Charger Source Priority", "icon": "mdi:battery-charging"},
+    "batteryType": {"name": "Battery Type", "icon": "mdi:battery"},
+    "mainsInputRange": {"name": "Mains Input Range", "icon": "mdi:transmission-tower"},
+    "batteryEqualizationMode": {"name": "Battery Equalization", "icon": "mdi:battery-sync"},
+    "startBalancing": {"name": "Start Balancing Immediately", "icon": "mdi:battery-sync"},
+    "dualOutputVoltageSwitch": {"name": "Dual Output Switch", "icon": "mdi:electric-switch"},
+    "gridConnectedSwitch1": {"name": "Grid Connected Switch", "icon": "mdi:electric-switch"},
+    "ledPatternLight1": {"name": "LED Pattern Switch", "icon": "mdi:led-on"},
+    "mainsAccessDelayEnabled": {"name": "Mains Access Delay", "icon": "mdi:timer"},
+    "mainCPUVersion1": {"name": "Main CPU Version", "icon": "mdi:chip"},
+    "generationPower": {
+        "name": "Generation Power",
+        "unit": "W",
+        "device_class": "power",
+        "icon": "mdi:solar-power",
+        "latest_scale": 1000.0,
+    },
+    "ratedActivePower": {"name": "Nominal Active Power", "unit": "W", "device_class": "power", "icon": "mdi:power-plug"},
+    "acOutputRatingApparentPower": {"name": "Nominal Apparent Power", "unit": "VA", "device_class": "apparent_power", "icon": "mdi:flash"},
+    "ratingOutputCurrent": {"name": "Nominal Output Current", "unit": "A", "device_class": "current", "icon": "mdi:current-ac"},
+    "nominalAcCurrent": {"name": "Nominal AC Current", "unit": "A", "device_class": "current", "icon": "mdi:current-ac"},
+    "gridConnectedCurrent": {"name": "Grid Connected Current Set", "unit": "A", "device_class": "current", "icon": "mdi:transmission-tower"},
+    "maxTotalChargeCurrent": {"name": "Max Total Charge Current", "unit": "A", "device_class": "current", "icon": "mdi:battery-charging"},
+    "maxUtilityChargeCurrent1": {"name": "Utility Charge Current", "unit": "A", "device_class": "current", "icon": "mdi:transmission-tower"},
+    "bmsBatteryDischargeCurrent": {"name": "BMS Battery Discharge Current", "unit": "A", "device_class": "current", "icon": "mdi:battery-arrow-down"},
+    "bmsBatteryChargingCurrent": {"name": "BMS Battery Charging Current", "unit": "A", "device_class": "current", "icon": "mdi:battery-arrow-up"},
+    "lowBatteryCutOffVoltage": {"name": "Low Battery Cut-off Voltage", "unit": "V", "device_class": "voltage", "icon": "mdi:battery-minus"},
+    "ratedBatteryVoltage": {"name": "Nominal Battery Voltage", "unit": "V", "device_class": "voltage", "icon": "mdi:battery"},
+    "bmsBatteryVoltage": {"name": "BMS Battery Voltage", "unit": "V", "device_class": "voltage", "icon": "mdi:battery"},
+    "bmsSingleSectionMinimumVoltage": {"name": "BMS Cell Minimum Voltage", "unit": "V", "device_class": "voltage", "icon": "mdi:battery-outline"},
+    "maximumVoltageBmsSingleSection": {"name": "BMS Cell Maximum Voltage", "unit": "V", "device_class": "voltage", "icon": "mdi:battery-outline"},
+    "dualOutputTurnOffVoltage": {"name": "Dual Output Cut-off Voltage", "unit": "V", "device_class": "voltage", "icon": "mdi:battery-minus"},
+    "comebackUtilityModeVolSBUPriorityStatus": {"name": "SBU Back To Utility Voltage", "unit": "V", "device_class": "voltage", "icon": "mdi:transmission-tower"},
+    "comebackBatteryModeVolSBUPriorityStatus": {"name": "SBU Back To Battery Voltage", "unit": "V", "device_class": "voltage", "icon": "mdi:battery"},
+    "floatChargingVoltage": {"name": "Float Charging Voltage", "unit": "V", "device_class": "voltage", "icon": "mdi:battery-charging"},
+    "bulkChargingVoltage": {"name": "Bulk Charging Voltage", "unit": "V", "device_class": "voltage", "icon": "mdi:battery-charging"},
+    "batteryEqualizationVoltage": {"name": "Battery Equalization Voltage", "unit": "V", "device_class": "voltage", "icon": "mdi:battery-sync"},
+    "nominalAcVoltage": {"name": "Nominal AC Voltage", "unit": "V", "device_class": "voltage", "icon": "mdi:transmission-tower"},
+    "ratedOutputVoltage": {"name": "Nominal Output Voltage", "unit": "V", "device_class": "voltage", "icon": "mdi:power-plug"},
+    # batteryRatingVoltage: the firmware itself reports 230 V under
+    # "rated voltage" for the battery while ratedBatteryVoltage says 48 V —
+    # a firmware mislabel.  Published as-is (it is what the device reports);
+    # drop it if it proves noisy.
+    "batteryRatingVoltage": {"name": "Battery Rated Voltage", "unit": "V", "device_class": "voltage", "icon": "mdi:battery"},
+    "ratedOutputFrequency": {"name": "Nominal Output Frequency", "unit": "Hz", "device_class": "frequency", "icon": "mdi:sine-wave"},
+    "batteryCapacity": {"name": "Battery Capacity", "unit": "%", "icon": "mdi:battery"},
+    "bmsBatterySOC": {"name": "BMS Battery SOC", "unit": "%", "icon": "mdi:battery"},
+    "dualOutputTurnsOffTheSOC": {"name": "Dual Output Cut-off SOC", "unit": "%", "icon": "mdi:battery-arrow-down"},
+    "dualOutputLimitPowerPercentage": {"name": "Dual Output Limit Power Percentage", "unit": "%", "icon": "mdi:gauge"},
+    "backToUtility": {"name": "Back To Utility SOC", "unit": "%", "icon": "mdi:transmission-tower"},
+    "batteryVoltUnderTurnOffSOC": {"name": "Battery Volt Under Cut-off SOC", "unit": "%", "icon": "mdi:percent"},
+    "batVoltBackToBat": {"name": "Battery Volt Back To Battery SOC", "unit": "%", "icon": "mdi:percent"},
+    "maximumTemperatureBmsSingleSection": {"name": "BMS Cell Maximum Temperature", "unit": "℃", "device_class": "temperature", "icon": "mdi:thermometer"},
+    "bmsSingleSectionMinimumTemperature": {"name": "BMS Cell Minimum Temperature", "unit": "℃", "device_class": "temperature", "icon": "mdi:thermometer"},
+    "bmsMosTemperature": {"name": "BMS MOS Temperature", "unit": "℃", "device_class": "temperature", "icon": "mdi:thermometer"},
+    "bmsAmbientTemperature": {"name": "BMS Ambient Temperature", "unit": "℃", "device_class": "temperature", "icon": "mdi:thermometer"},
+    "numberOfBMSCycles": {"name": "BMS Cycle Count", "icon": "mdi:counter"},
+    "bmsBatteryCapacity": {"name": "BMS Battery Capacity", "unit": "Ah", "icon": "mdi:battery"},
+    "batteryEqualizationInterval": {"name": "Battery Equalization Interval", "unit": "day", "icon": "mdi:calendar-clock"},
+    "batteryEqualizationTime": {"name": "Battery Equalization Time", "unit": "min", "icon": "mdi:clock-outline"},
+    "batteryEqualizationTimeout": {"name": "Battery Equalization Timeout", "unit": "min", "icon": "mdi:clock-outline"},
+    # batteryNumber ("Battery Piece") is deliberately NOT mapped: the same
+    # field carries value=2, valueDisplay="48" and unit "V" — three mutually
+    # inconsistent readings.  A wrong number is worse than an absent sensor.
+
     # Monthly summary sensors
     "monthly_pv_generated": {
         "name": "Monthly PV Generated",
