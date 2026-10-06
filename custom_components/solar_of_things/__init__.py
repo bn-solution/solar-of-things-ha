@@ -334,6 +334,23 @@ class SolarOfThingsDeviceCoordinator(DataUpdateCoordinator):
             settings = await self.hass.async_add_executor_job(
                 self.api.fetch_settings, self.device_id
             )
+            # Latest-state snapshot (dataSource=2) — additive fallback for
+            # attributes the time-series endpoint never carries (enum
+            # states, BMS cells, settings echo).  A failure here must not
+            # take the coordinator down; TokenExpiredError still propagates
+            # so the outer except triggers re-auth.
+            try:
+                latest_fields = await self.hass.async_add_executor_job(
+                    self.api.fetch_latest_state, self.device_id
+                )
+            except TokenExpiredError:
+                raise
+            except Exception as err:
+                _LOGGER.debug(
+                    "SolarOfThings device %s: latest-state unavailable: %s",
+                    self.device_id, err,
+                )
+                latest_fields = {}
             # Daily production (kWh) comes from device/details, not the
             # time-series endpoint. Purely additive: a failure here must not
             # take the whole coordinator down, so the daily_production key is
@@ -356,6 +373,7 @@ class SolarOfThingsDeviceCoordinator(DataUpdateCoordinator):
             return {
                 "time_series": time_series,
                 "settings": settings,
+                "latest_fields": latest_fields,
                 "device": self.device_id,
                 "station_id": self.station_id,
                 "device_meta": self.device_meta,
