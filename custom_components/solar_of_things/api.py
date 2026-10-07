@@ -1092,10 +1092,11 @@ class SolarOfThingsAPI:
     def fetch_latest_state(self, device_id: str) -> dict[str, Any]:
         """Fetch the device's latest reported state (dataSource=2).
 
-        Returns a flat dict of {fieldKey: fieldObject} where each object
-        carries at least 'unit', 'value' and 'valueDisplay'.  Covers every
-        attribute the firmware reports, including enum states the
-        historical time-series endpoint never carries.
+        Returns {"time": <device report time or None>, "fields": {...}}
+        where each field object carries at least 'unit', 'value' and
+        'valueDisplay'.  Covers every attribute the firmware reports,
+        including enum states the historical time-series endpoint never
+        carries.
         """
         self._ensure_token_valid()
         url = f"{API_BASE_URL}{API_LATEST_STATE}?deviceId={device_id}&dataSource=2"
@@ -1107,7 +1108,8 @@ class SolarOfThingsAPI:
                 f"Latest state error code={data.get('code')} "
                 f"message={data.get('message')}"
             )
-        return ((data.get("data") or {}).get("fields")) or {}
+        payload = data.get("data") or {}
+        return {"time": payload.get("time"), "fields": payload.get("fields") or {}}
 
     # Alias used by the coordinator in __init__.py
     fetch_settings = get_device_settings

@@ -20,6 +20,10 @@
   Real-time power data · Battery management · Grid control · Energy Dashboard ready
 </p>
 
+<p align="center">
+  <sub>Last updated: 2026-10-07 · 80 per-device sensors · 12 station sensors</sub>
+</p>
+
 > [!IMPORTANT]
 > **Support scope.** This integration was built and is maintained for the author's
 > own hardware (a Sumry 3600 inverter). It's shared publicly so others with
@@ -55,7 +59,7 @@ The **Solar of Things** integration connects Home Assistant to the
 [Siseli solar portal](https://solar.siseli.com) and provides:
 
 - **Auto-discovery** of every inverter under your station — enter your Station ID once and Home Assistant finds all devices automatically.
-- **70+ real-time sensors** updated every 5 minutes.
+- **80+ real-time sensors** updated every 5 minutes.
 - **4 monthly summary sensors** for energy totals and solar coverage.
 - **8 control entities** (sliders, dropdowns, switches) to manage battery limits, operating modes, and grid settings from HA.
 - Full **Home Assistant Energy Dashboard** compatibility.
@@ -99,7 +103,7 @@ this project, not a fallback.
 | Category | What you get |
 |---|---|
 | 🔍 **Auto-discovery** | Enter Station ID → HA fetches all device IDs automatically |
-| 📊 **Real-time monitoring** | 70+ per-device sensors, updated every 5 min |
+| 📊 **Real-time monitoring** | 80+ per-device sensors, updated every 5 min |
 | 📅 **Monthly statistics** | 4 station-level energy summary sensors |
 | 🎛️ **System control** | 8 control entities (battery limits, modes, grid switches) |
 | ⚡ **Energy Dashboard** | All power and energy sensors are dashboard-ready |
@@ -164,6 +168,7 @@ this project, not a fallback.
 | `{device} LED Pattern Switch` | — | LED indicator switch |
 | `{device} Mains Access Delay` | — | Mains access delay enabled |
 | `{device} Main CPU Version` | — | Firmware version string |
+| `{device} Last Update` | — | Timestamp of the device's most recent report (spot a device that stopped reporting) |
 
 #### Electrical ratings, limits & set-points
 

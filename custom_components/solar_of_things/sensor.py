@@ -1,6 +1,7 @@
 """Sensor platform for Solar of Things integration."""
 from __future__ import annotations
 
+from datetime import datetime
 import logging
 
 from homeassistant.components.sensor import SensorEntity, SensorDeviceClass, SensorStateClass
@@ -17,6 +18,7 @@ from homeassistant.const import (
     UnitOfTime,
 )
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -92,6 +94,15 @@ async def async_setup_entry(
                     sensor_definition=definition,
                 )
             )
+
+        entities.append(
+            SolarOfThingsLastUpdateSensor(
+                coordinator=coordinator,
+                station_id=station_id,
+                device_id=device_id,
+                device_name=device_name,
+            )
+        )
 
     # Station-level monthly sensors
     if station_coordinator:
@@ -221,6 +232,47 @@ class SolarOfThingsDeviceSensor(CoordinatorEntity, SensorEntity):
         try:
             return round(float(val), 2)
         except (TypeError, ValueError):
+            return None
+
+
+class SolarOfThingsLastUpdateSensor(CoordinatorEntity, SensorEntity):
+    """Timestamp of the device's most recent report (latest-state endpoint).
+
+    Shows when the inverter last pushed data to the Siseli portal — useful
+    for spotting a device that stopped reporting while HA keeps polling.
+    """
+
+    _attr_has_entity_name = True
+    _attr_device_class = SensorDeviceClass.TIMESTAMP
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_icon = "mdi:clock-check-outline"
+
+    def __init__(self, coordinator, station_id: str, device_id: str, device_name: str) -> None:
+        super().__init__(coordinator)
+        self._station_id = station_id
+        self._device_id = device_id
+        self._device_name = device_name
+        self._attr_name = "Last Update"
+        self._attr_unique_id = f"{DOMAIN}_{station_id}_{device_id}_last_update"
+
+    @property
+    def device_info(self):
+        return {
+            "identifiers": {(DOMAIN, self._device_id)},
+            "name": self._device_name,
+            "manufacturer": "Siseli",
+            "model": (self.coordinator.data.get("device_meta") or {}).get("model") if self.coordinator.data else None,
+            "via_device": (DOMAIN, self._station_id),
+        }
+
+    @property
+    def native_value(self):
+        raw = (self.coordinator.data or {}).get("latest_time")
+        if not raw:
+            return None
+        try:
+            return datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
+        except ValueError:
             return None
 
 
